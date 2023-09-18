@@ -96,54 +96,98 @@ class _SchedulePageViewState extends State<SchedulePageView> {
 
   List<Lesson> _getLessonsWithEmpty(List<Lesson> lessons, String group) {
     List<Lesson> formattedLessons = [];
-    if (ScheduleUtils.isCollegeGroup(group)) {
-      ScheduleUtils.collegeTimesStart.forEach((key, value) {
-        bool notEmpty = false;
-        for (final lesson in lessons) {
-          if (lesson.timeStart == key) {
-            formattedLessons.add(lesson);
-            notEmpty = true;
-          }
+    Map<String, int> timeMapStart = ScheduleUtils.isCollegeGroup(group)
+        ? ScheduleUtils.collegeTimesStart
+        : ScheduleUtils.universityTimesStart;
+    Map<String, int> timeMapEnd = ScheduleUtils.isCollegeGroup(group)
+        ? ScheduleUtils.collegeTimesEnd
+        : ScheduleUtils.universityTimesEnd;
+
+    timeMapStart.forEach((key, value) {
+      bool notEmpty = false;
+      for (final lesson in lessons) {
+        if (lesson.timeStart == key) {
+          formattedLessons.add(lesson);
+          notEmpty = true;
         }
-        if (notEmpty == false) {
-          formattedLessons.add(
-            Lesson(
-              name: '',
-              rooms: const [],
-              timeStart: key,
-              timeEnd: ScheduleUtils.collegeTimesEnd.keys.toList()[value - 1],
-              weeks: const [],
-              types: '',
-              teachers: const [],
-            ),
-          );
-        }
-      });
-    } else {
-      ScheduleUtils.universityTimesStart.forEach((key, value) {
-        bool notEmpty = false;
-        for (final lesson in lessons) {
-          if (lesson.timeStart == key) {
-            formattedLessons.add(lesson);
-            notEmpty = true;
-          }
-        }
-        if (notEmpty == false) {
-          formattedLessons.add(
-            Lesson(
-              name: '',
-              rooms: const [],
-              timeStart: key,
-              timeEnd:
-                  ScheduleUtils.universityTimesEnd.keys.toList()[value - 1],
-              weeks: const [],
-              types: '',
-              teachers: const [],
-            ),
-          );
-        }
-      });
+      }
+      if (notEmpty == false) {
+        formattedLessons.add(
+          Lesson.emptyLesson(
+            timeStart: key,
+            timeEnd: timeMapEnd.keys.toList()[value - 1],
+          ),
+        );
+      }
+    });
+    lessons = formattedLessons;
+    return lessons;
+  }
+
+  List<Lesson> _getLessonsBySettings(
+      ScheduleSettings settings, List<Lesson> lessons, String group) {
+    if (settings.showEmptyLessons && settings.showLections) {
+      return _getLessonsWithEmpty(lessons, group);
     }
+    List<Lesson> formattedLessons = [];
+    Map<String, int> timeMapStart = ScheduleUtils.isCollegeGroup(group)
+        ? ScheduleUtils.collegeTimesStart
+        : ScheduleUtils.universityTimesStart;
+    Map<String, int> timeMapEnd = ScheduleUtils.isCollegeGroup(group)
+        ? ScheduleUtils.collegeTimesEnd
+        : ScheduleUtils.universityTimesEnd;
+
+    timeMapStart.forEach(
+      (key, value) {
+        // for (final lesson in lessons) {
+        //   // lesson is not empty
+        //   if (lesson.timeStart == key) {
+        //     // lesson is lection
+        //     if (lesson.types.contains("лек")) {
+        //       if (settings.showLections) {
+        //         formattedLessons.add(lesson);
+        //       } else {
+        //         formattedLessons.add(
+        //           Lesson.emptyLesson(
+        //             timeStart: key,
+        //             timeEnd: timeMapEnd.keys.toList()[value - 1],
+        //           ),
+        //         );
+        //       }
+        //     } else {
+        //       formattedLessons.add(lesson);
+        //     }
+        //   } else if (settings.showEmptyLessons) {
+        //     formattedLessons.add(
+        //       Lesson.emptyLesson(
+        //         timeStart: key,
+        //         timeEnd: timeMapEnd.keys.toList()[value - 1],
+        //       ),
+        //     );
+        //   }
+        // }
+        bool notEmpty = false;
+        for (final lesson in lessons) {
+          if (lesson.timeStart == key) {
+            if (lesson.types.contains("лек") && !settings.showLections) {
+            } else {
+              formattedLessons.add(lesson);
+              notEmpty = true;
+            }
+          }
+        }
+        if (settings.showEmptyLessons) {
+          if (notEmpty == false) {
+            formattedLessons.add(
+              Lesson.emptyLesson(
+                timeStart: key,
+                timeEnd: timeMapEnd.keys.toList()[value - 1],
+              ),
+            );
+          }
+        }
+      },
+    );
     lessons = formattedLessons;
     return lessons;
   }
@@ -158,8 +202,8 @@ class _SchedulePageViewState extends State<SchedulePageView> {
 
       final state = context.read<ScheduleBloc>().state as ScheduleLoaded;
       final ScheduleSettings settings = state.scheduleSettings;
-      if (settings.showEmptyLessons) {
-        lessons = _getLessonsWithEmpty(lessons, state.activeGroup);
+      if (settings.showEmptyLessons || !settings.showLections) {
+        lessons = _getLessonsBySettings(settings, lessons, state.activeGroup);
       }
 
       return NotificationListener<ScrollNotification>(
@@ -496,7 +540,6 @@ class _SchedulePageViewState extends State<SchedulePageView> {
         } else {
           return Column(
             children: [
-              _buildStoriesBuilder(),
               _buildCalendar(false),
               const SizedBox(height: 25),
               Expanded(child: _buildPageView()),

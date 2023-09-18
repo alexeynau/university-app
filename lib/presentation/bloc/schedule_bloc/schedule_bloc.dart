@@ -234,6 +234,7 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
   ) async {
     final oldSettings = await getScheduleSettings();
     final newSettings = ScheduleSettings(
+      showLections: event.showLections ?? oldSettings.showLections,
       showEmptyLessons: event.showEmptyLessons ?? oldSettings.showEmptyLessons,
       showLessonsNumbers:
           event.showEmptyLessons ?? oldSettings.showLessonsNumbers,

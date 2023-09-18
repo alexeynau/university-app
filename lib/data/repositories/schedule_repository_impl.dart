@@ -150,6 +150,7 @@ class ScheduleRepositoryImpl implements ScheduleRepository {
       return localSettings;
     } on CacheException {
       const newLocalSettings = ScheduleSettingsModel(
+        showLections: true,
         showEmptyLessons: false,
         showLessonsNumbers: false,
         calendarFormat: 2,
@@ -162,6 +163,7 @@ class ScheduleRepositoryImpl implements ScheduleRepository {
   @override
   Future<void> setSettings(ScheduleSettings settings) async {
     localDataSource.setSettingsToCache(ScheduleSettingsModel(
+      showLections: settings.showLections,
       showEmptyLessons: settings.showEmptyLessons,
       showLessonsNumbers: settings.showLessonsNumbers,
       calendarFormat: settings.calendarFormat,

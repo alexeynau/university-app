@@ -22,4 +22,16 @@ class Lesson extends Equatable {
   @override
   List<Object?> get props =>
       [name, weeks, timeStart, timeEnd, types, teachers, rooms];
+
+  factory Lesson.emptyLesson(
+          {required String timeStart, required String timeEnd}) =>
+      Lesson(
+        name: '',
+        rooms: const [],
+        timeStart: timeStart,
+        timeEnd: timeEnd,
+        weeks: const [],
+        types: '',
+        teachers: const [],
+      );
 }

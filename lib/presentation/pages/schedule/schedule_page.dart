@@ -198,6 +198,7 @@ class _SchedulePageState extends State<SchedulePage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        // show empty lessons
                         if (state is ScheduleLoaded)
                           SettingsSwitchButton(
                             initialValue:
@@ -212,6 +213,22 @@ class _SchedulePageState extends State<SchedulePage> {
                               context.read<ScheduleBloc>().add(
                                   ScheduleUpdateSettingsEvent(
                                       showEmptyLessons: value));
+                            },
+                          ),
+                        // show lections
+                        if (state is ScheduleLoaded)
+                          SettingsSwitchButton(
+                            initialValue: state.scheduleSettings.showLections,
+                            svgPicture: SvgPicture.asset(
+                              'assets/icons/lessons.svg',
+                              height: 16,
+                              width: 16,
+                            ),
+                            text: "Показывать лекции",
+                            onChanged: (value) {
+                              context.read<ScheduleBloc>().add(
+                                  ScheduleUpdateSettingsEvent(
+                                      showLections: value));
                             },
                           ),
                         // SizedBox(height: 10),

@@ -52,11 +52,12 @@ class ScheduleDeleteEvent extends ScheduleEvent {
 
 class ScheduleUpdateSettingsEvent extends ScheduleEvent {
   const ScheduleUpdateSettingsEvent({
+    this.showLections,
     this.showEmptyLessons,
     this.showLesonsNums,
     this.calendarFormat,
   });
-
+  final bool? showLections;
   final bool? showEmptyLessons;
   final bool? showLesonsNums;
   final int? calendarFormat;
